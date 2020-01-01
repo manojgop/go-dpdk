@@ -14,9 +14,9 @@ import (
 	"github.com/yerden/go-dpdk/mempool"
 )
 
-// FdReader input port built on top of valid non-blocking file
+// FdIn input port built on top of valid non-blocking file
 // descriptor.
-type FdReader struct {
+type FdIn struct {
 	// Pre-initialized buffer pool.
 	*mempool.Mempool
 
@@ -27,20 +27,21 @@ type FdReader struct {
 	MTU uint32
 }
 
-// ReaderOps implements ReaderParams interface.
-func (rd *FdReader) ReaderOps() (*ReaderOps, unsafe.Pointer) {
-	ops := (*ReaderOps)(&C.rte_port_fd_reader_ops)
+// Create implements ConfigIn interface.
+func (rd *FdIn) Create(socket int) (*InOps, *In) {
+	ops := (*InOps)(&C.rte_port_fd_reader_ops)
 	rc := &C.struct_rte_port_fd_reader_params{
 		fd:      C.int(rd.Fd),
 		mtu:     C.uint32_t(rd.MTU),
 		mempool: (*C.struct_rte_mempool)(unsafe.Pointer(rd.Mempool)),
 	}
-	return ops, unsafe.Pointer(rc)
+
+	return createIn(ops, unsafe.Pointer(rc), socket)
 }
 
-// FdWriter is an output port built on top of valid non-blocking file
+// FdOut is an output port built on top of valid non-blocking file
 // descriptor.
-type FdWriter struct {
+type FdOut struct {
 	// File descriptor.
 	Fd uintptr
 
@@ -52,16 +53,16 @@ type FdWriter struct {
 	Retries uint32
 }
 
-// WriterOps implements WriterParams interface.
-func (wr *FdWriter) WriterOps() (ops *WriterOps, arg unsafe.Pointer) {
+// Create implements ConfigOut interface.
+func (wr *FdOut) Create(socket int) (ops *OutOps, p *Out) {
 	if !wr.NoDrop {
-		ops = (*WriterOps)(&C.rte_port_fd_writer_ops)
+		ops = (*OutOps)(&C.rte_port_fd_writer_ops)
 	} else {
-		ops = (*WriterOps)(&C.rte_port_fd_writer_nodrop_ops)
+		ops = (*OutOps)(&C.rte_port_fd_writer_nodrop_ops)
 	}
-	arg = unsafe.Pointer(&C.struct_rte_port_fd_writer_nodrop_params{
+	rc := &C.struct_rte_port_fd_writer_nodrop_params{
 		fd:        C.int(wr.Fd),
 		n_retries: C.uint32_t(wr.Retries),
-	})
-	return
+	}
+	return createOut(ops, unsafe.Pointer(rc), socket)
 }

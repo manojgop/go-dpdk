@@ -7,18 +7,17 @@ package port
 import "C"
 
 import (
-	"runtime"
 	"unsafe"
 
 	"github.com/yerden/go-dpdk/mempool"
 )
 
 // compile time checks
-var _ = []ReaderParams{
+var _ = []ConfigIn{
 	&Source{},
 }
 
-var _ = []WriterParams{
+var _ = []ConfigOut{
 	&Sink{},
 }
 
@@ -36,22 +35,17 @@ type Source struct {
 	BytesPerPacket uint32
 }
 
-// ReaderOps implements ReaderParams interface.
-func (rd *Source) ReaderOps() (*ReaderOps, unsafe.Pointer) {
-	ops := (*ReaderOps)(&C.rte_port_source_ops)
+// Create implements ConfigIn interface.
+func (rd *Source) Create(socket int) (*InOps, *In) {
+	ops := (*InOps)(&C.rte_port_source_ops)
 	rc := &C.struct_rte_port_source_params{}
 	rc.mempool = (*C.struct_rte_mempool)(unsafe.Pointer(rd.Mempool))
 	rc.n_bytes_per_pkt = C.uint32_t(rd.BytesPerPacket)
 	if rd.Filename != "" {
 		rc.file_name = C.CString(rd.Filename)
-		// file_name no longer needed once rc is out of use, it
-		// doesn't persist in port itself, so we may free it as long
-		// as it's out of reach.
-		runtime.SetFinalizer(rc, func(rc *C.struct_rte_port_source_params) {
-			C.free(unsafe.Pointer(rc.file_name))
-		})
+		defer C.free(unsafe.Pointer(rc.file_name))
 	}
-	return ops, unsafe.Pointer(rc)
+	return createIn(ops, unsafe.Pointer(rc), socket)
 }
 
 // Sink is an output port that drops all packets written to it.
@@ -64,19 +58,14 @@ type Sink struct {
 	MaxPackets uint32
 }
 
-// WriterOps implements WriterParams interface.
-func (wr *Sink) WriterOps() (*WriterOps, unsafe.Pointer) {
-	ops := (*WriterOps)(&C.rte_port_sink_ops)
+// Create implements ConfigOut interface.
+func (wr *Sink) Create(socket int) (*OutOps, *Out) {
+	ops := (*OutOps)(&C.rte_port_sink_ops)
 	rc := &C.struct_rte_port_sink_params{}
 	rc.max_n_pkts = C.uint32_t(wr.MaxPackets)
 	if wr.Filename != "" {
 		rc.file_name = C.CString(wr.Filename)
-		// file_name no longer needed once rc is out of use, it
-		// doesn't persist in port itself, so we may free it as long
-		// as it's out of reach.
-		runtime.SetFinalizer(rc, func(rc *C.struct_rte_port_sink_params) {
-			C.free(unsafe.Pointer(rc.file_name))
-		})
+		defer C.free(unsafe.Pointer(rc.file_name))
 	}
-	return ops, unsafe.Pointer(rc)
+	return createOut(ops, unsafe.Pointer(rc), socket)
 }

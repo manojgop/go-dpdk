@@ -41,41 +41,39 @@ import (
 	"github.com/yerden/go-dpdk/common"
 )
 
-// ReaderOps describes input port interface defining the input port
-// operation.
-type ReaderOps C.struct_rte_port_in_ops
+type opaqueData [0]byte
 
-// WriterOps describes output port interface defining the output port
+// InOps describes input port interface defining the input port
 // operation.
-type WriterOps C.struct_rte_port_out_ops
+type InOps C.struct_rte_port_in_ops
 
-// ReaderParams implements reader port capability which allows to read
+// OutOps describes output port interface defining the output port
+// operation.
+type OutOps C.struct_rte_port_out_ops
+
+// In is an input port instance.
+type In opaqueData
+
+// Out is an output port instance.
+type Out opaqueData
+
+// ConfigIn implements reader port capability which allows to read
 // packets from it.
-type ReaderParams interface {
-	// ReaderOps returns pointer to statically allocated call table.
-	// and an opaque argument which is required to create port.
-	ReaderOps() (ops *ReaderOps, arg unsafe.Pointer)
+type ConfigIn interface {
+	// Create returns pointer to statically allocated call table
+	// and a pointer to the opaque port struct.
+	Create(socket int) (*InOps, *In)
 }
 
-// WriterParams implements writer port capability which allows to
+// ConfigOut implements writer port capability which allows to
 // write packets to it.
-type WriterParams interface {
-	// WriterOps returns pointer to statically allocated call table.
-	// and an opaque argument which is required to create port.
-	WriterOps() (ops *WriterOps, arg unsafe.Pointer)
+type ConfigOut interface {
+	// Create returns pointer to statically allocated call table
+	// and a pointer to the opaque port struct.
+	Create(socket int) (*OutOps, *Out)
 }
 
-// Reader is the instance of reader port.
-type Reader struct {
-	Ops  *ReaderOps
-	Port unsafe.Pointer
-}
-
-// Writer is the instance of writer port.
-type Writer struct {
-	Ops  *WriterOps
-	Port unsafe.Pointer
-}
+// XXX: we need to wrap calls which are not performance bottlenecks.
 
 func err(n ...interface{}) error {
 	if len(n) == 0 {
@@ -85,36 +83,20 @@ func err(n ...interface{}) error {
 	return common.IntToErr(n[0])
 }
 
-// XXX: we need to wrap calls which are not performance bottlenecks.
-
-// NewReader creates new Reader. ReaderParams and destination NUMA
-// socket must be specified. In case of an error, nil is returned.
-func NewReader(p ReaderParams, socket int) *Reader {
-	ops, arg := p.ReaderOps()
-	port := C.go_rd_create(unsafe.Pointer(ops), arg, C.int(socket))
-	if port == nil {
-		return nil
-	}
-	return &Reader{ops, port}
+func createIn(ops *InOps, arg unsafe.Pointer, socket int) (*InOps, *In) {
+	return ops, (*In)(C.go_rd_create(unsafe.Pointer(ops), arg, C.int(socket)))
 }
 
-// Free destroys once created Reader port.
-func (rd *Reader) Free() error {
-	return err(C.go_rd_free(unsafe.Pointer(rd.Ops), rd.Port))
+func createOut(ops *OutOps, arg unsafe.Pointer, socket int) (*OutOps, *Out) {
+	return ops, (*Out)(C.go_wr_create(unsafe.Pointer(ops), arg, C.int(socket)))
 }
 
-// NewWriter creates new Writer. ReaderParams and destination NUMA
-// socket must be specified. In case of an error, nil is returned.
-func NewWriter(p WriterParams, socket int) *Writer {
-	ops, arg := p.WriterOps()
-	port := C.go_wr_create(unsafe.Pointer(ops), arg, C.int(socket))
-	if port == nil {
-		return nil
-	}
-	return &Writer{ops, port}
+// Free releases all memory allocated when creating port instance.
+func (ops *InOps) Free(p *In) error {
+	return err(C.go_rd_free(unsafe.Pointer(ops), unsafe.Pointer(p)))
 }
 
-// Free destroys once created Writer port.
-func (wr *Writer) Free() error {
-	return err(C.go_wr_free(unsafe.Pointer(wr.Ops), wr.Port))
+// Free releases all memory allocated when creating port instance.
+func (ops *OutOps) Free(p *Out) error {
+	return err(C.go_wr_free(unsafe.Pointer(ops), unsafe.Pointer(p)))
 }
