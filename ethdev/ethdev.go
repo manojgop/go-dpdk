@@ -37,24 +37,26 @@ import (
 
 // Various RX offloads flags.
 const (
-	RxOffloadVlanStrip      uint64 = C.DEV_RX_OFFLOAD_VLAN_STRIP
-	RxOffloadIpv4Cksum             = C.DEV_RX_OFFLOAD_IPV4_CKSUM
-	RxOffloadUDPCksum              = C.DEV_RX_OFFLOAD_UDP_CKSUM
-	RxOffloadTCPCksum              = C.DEV_RX_OFFLOAD_TCP_CKSUM
-	RxOffloadTCPLro                = C.DEV_RX_OFFLOAD_TCP_LRO
-	RxOffloadQinqStrip             = C.DEV_RX_OFFLOAD_QINQ_STRIP
-	RxOffloadOuterIpv4Cksum        = C.DEV_RX_OFFLOAD_OUTER_IPV4_CKSUM
-	RxOffloadMacsecStrip           = C.DEV_RX_OFFLOAD_MACSEC_STRIP
-	RxOffloadHeaderSplit           = C.DEV_RX_OFFLOAD_HEADER_SPLIT
-	RxOffloadVlanFilter            = C.DEV_RX_OFFLOAD_VLAN_FILTER
-	RxOffloadVlanExtend            = C.DEV_RX_OFFLOAD_VLAN_EXTEND
-	RxOffloadJumboFrame            = C.DEV_RX_OFFLOAD_JUMBO_FRAME
-	RxOffloadScatter               = C.DEV_RX_OFFLOAD_SCATTER
-	RxOffloadTimestamp             = C.DEV_RX_OFFLOAD_TIMESTAMP
-	RxOffloadSecurity              = C.DEV_RX_OFFLOAD_SECURITY
-	// RxOffloadKeepCrc        = C.DEV_RX_OFFLOAD_KEEP_CRC
-	// RxOffloadSCTPCksum      = C.DEV_RX_OFFLOAD_SCTP_CKSUM
-	// RxOffloadOuterUDPCksum  = C.DEV_RX_OFFLOAD_OUTER_UDP_CKSUM
+	RxOffloadVlanStrip      uint64 = (1 << iota) // 0x00000001
+	RxOffloadIpv4Cksum                           // 0x00000002
+	RxOffloadUDPCksum                            // 0x00000004
+	RxOffloadTCPCksum                            // 0x00000008
+	RxOffloadTCPLro                              // 0x00000010
+	RxOffloadQinqStrip                           // 0x00000020
+	RxOffloadOuterIpv4Cksum                      // 0x00000040
+	RxOffloadMacsecStrip                         // 0x00000080
+	RxOffloadHeaderSplit                         // 0x00000100
+	RxOffloadVlanFilter                          // 0x00000200
+	RxOffloadVlanExtend                          // 0x00000400
+	RxOffloadJumboFrame                          // 0x00000800
+	_
+	RxOffloadScatter       // 0x00002000
+	RxOffloadTimestamp     // 0x00004000
+	RxOffloadSecurity      // 0x00008000
+	RxOffloadKeepCrc       // 0x00010000
+	RxOffloadSCTPCksum     // 0x00020000
+	RxOffloadOuterUDPCksum // 0x00040000
+	RxOffloadRssHash       // 0x00080000
 
 	RxOffloadChecksum = (RxOffloadIpv4Cksum |
 		RxOffloadUDPCksum |
@@ -66,47 +68,47 @@ const (
 
 // Various TX offloads flags.
 const (
-	TxOffloadVlanInsert     uint64 = C.DEV_TX_OFFLOAD_VLAN_INSERT
-	TxOffloadIpv4Cksum             = C.DEV_TX_OFFLOAD_IPV4_CKSUM
-	TxOffloadUDPCksum              = C.DEV_TX_OFFLOAD_UDP_CKSUM
-	TxOffloadTCPCksum              = C.DEV_TX_OFFLOAD_TCP_CKSUM
-	TxOffloadSCTPCksum             = C.DEV_TX_OFFLOAD_SCTP_CKSUM
-	TxOffloadTCPTso                = C.DEV_TX_OFFLOAD_TCP_TSO
-	TxOffloadUDPTso                = C.DEV_TX_OFFLOAD_UDP_TSO
-	TxOffloadOuterIpv4Cksum        = C.DEV_TX_OFFLOAD_OUTER_IPV4_CKSUM
-	TxOffloadQinqInsert            = C.DEV_TX_OFFLOAD_QINQ_INSERT
-	TxOffloadVxlanTnlTso           = C.DEV_TX_OFFLOAD_VXLAN_TNL_TSO
-	TxOffloadGreTnlTso             = C.DEV_TX_OFFLOAD_GRE_TNL_TSO
-	TxOffloadIpipTnlTso            = C.DEV_TX_OFFLOAD_IPIP_TNL_TSO
-	TxOffloadGeneveTnlTso          = C.DEV_TX_OFFLOAD_GENEVE_TNL_TSO
-	TxOffloadMacsecInsert          = C.DEV_TX_OFFLOAD_MACSEC_INSERT
-	TxOffloadMtLockfree            = C.DEV_TX_OFFLOAD_MT_LOCKFREE
-	TxOffloadMultiSegs             = C.DEV_TX_OFFLOAD_MULTI_SEGS
-	TxOffloadMbufFastFree          = C.DEV_TX_OFFLOAD_MBUF_FAST_FREE
-	TxOffloadSecurity              = C.DEV_TX_OFFLOAD_SECURITY
-	// TxOffloadIpTnlTso       = C.DEV_TX_OFFLOAD_IP_TNL_TSO
-	// TxOffloadOuterUDPCksum  = C.DEV_TX_OFFLOAD_OUTER_UDP_CKSUM
-	// TxOffloadMatchMetadata  = C.DEV_TX_OFFLOAD_MATCH_METADATA
+	TxOffloadVlanInsert     uint64 = (1 << iota) // 0x00000001
+	TxOffloadIpv4Cksum                           // 0x00000002
+	TxOffloadUDPCksum                            // 0x00000004
+	TxOffloadTCPCksum                            // 0x00000008
+	TxOffloadSCTPCksum                           // 0x00000010
+	TxOffloadTCPTso                              // 0x00000020
+	TxOffloadUDPTso                              // 0x00000040
+	TxOffloadOuterIpv4Cksum                      // 0x00000080
+	TxOffloadQinqInsert                          // 0x00000100
+	TxOffloadVxlanTnlTso                         // 0x00000200
+	TxOffloadGreTnlTso                           // 0x00000400
+	TxOffloadIPIPTnlTso                          // 0x00000800
+	TxOffloadGeneveTnlTso                        // 0x00001000
+	TxOffloadMacsecInsert                        // 0x00002000
+	TxOffloadMtLockfree                          // 0x00004000
+	TxOffloadMultiSegs                           // 0x00008000
+	TxOffloadMbufFastFree                        // 0x00010000
+	TxOffloadSecurity                            // 0x00020000
+	TxOffloadUDPTnlTso                           // 0x00040000
+	TxOffloadIPTnlTso                            // 0x00080000
+	TxOffloadOuterUDPCksum                       // 0x00100000
 )
 
 // Device supported speeds bitmap flags.
 const (
-	LinkSpeedAutoneg uint = C.ETH_LINK_SPEED_AUTONEG /**< Autonegotiate (all speeds) */
-	LinkSpeedFixed        = C.ETH_LINK_SPEED_FIXED   /**< Disable autoneg (fixed speed) */
-	LinkSpeed10mHd        = C.ETH_LINK_SPEED_10M_HD  /**<  10 Mbps half-duplex */
-	LinkSpeed10m          = C.ETH_LINK_SPEED_10M     /**<  10 Mbps full-duplex */
-	LinkSpeed100mHd       = C.ETH_LINK_SPEED_100M_HD /**< 100 Mbps half-duplex */
-	LinkSpeed100m         = C.ETH_LINK_SPEED_100M    /**< 100 Mbps full-duplex */
-	LinkSpeed1g           = C.ETH_LINK_SPEED_1G      /**<   1 Gbps */
-	LinkSpeed2_5g         = C.ETH_LINK_SPEED_2_5G    /**< 2.5 Gbps */
-	LinkSpeed5g           = C.ETH_LINK_SPEED_5G      /**<   5 Gbps */
-	LinkSpeed10g          = C.ETH_LINK_SPEED_10G     /**<  10 Gbps */
-	LinkSpeed20g          = C.ETH_LINK_SPEED_20G     /**<  20 Gbps */
-	LinkSpeed25g          = C.ETH_LINK_SPEED_25G     /**<  25 Gbps */
-	LinkSpeed40g          = C.ETH_LINK_SPEED_40G     /**<  40 Gbps */
-	LinkSpeed50g          = C.ETH_LINK_SPEED_50G     /**<  50 Gbps */
-	LinkSpeed56g          = C.ETH_LINK_SPEED_56G     /**<  56 Gbps */
-	LinkSpeed100g         = C.ETH_LINK_SPEED_100G    /**< 100 Gbps */
+	LinkSpeedAutoneg uint = 0                 /**< Autonegotiate (all speeds) */
+	LinkSpeedFixed        = (1 << (iota - 1)) /**< Disable autoneg (fixed speed) */
+	LinkSpeed10mHd                            /**<  10 Mbps half-duplex */
+	LinkSpeed10m                              /**<  10 Mbps full-duplex */
+	LinkSpeed100mHd                           /**< 100 Mbps half-duplex */
+	LinkSpeed100m                             /**< 100 Mbps full-duplex */
+	LinkSpeed1g                               /**<   1 Gbps */
+	LinkSpeed2_5g                             /**< 2.5 Gbps */
+	LinkSpeed5g                               /**<   5 Gbps */
+	LinkSpeed10g                              /**<  10 Gbps */
+	LinkSpeed20g                              /**<  20 Gbps */
+	LinkSpeed25g                              /**<  25 Gbps */
+	LinkSpeed40g                              /**<  40 Gbps */
+	LinkSpeed50g                              /**<  50 Gbps */
+	LinkSpeed56g                              /**<  56 Gbps */
+	LinkSpeed100g                             /**< 100 Gbps */
 )
 
 // A set of values to identify what method is to be used to route
