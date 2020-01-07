@@ -448,6 +448,11 @@ func (pid Port) RxqSetup(qid, nDesc uint16, mp *mempool.Mempool, opts ...QueueOp
 		(*C.struct_rte_mempool)(unsafe.Pointer(mp))))
 }
 
+// RxqStop stops specified RX queue of a port.
+func (pid Port) RxqStop(qid uint16) error {
+	return err(C.rte_eth_dev_rx_queue_stop(C.ushort(pid), C.ushort(qid)))
+}
+
 // TxqSetup allocates and set up a transmit queue for an Ethernet
 // device.
 //
@@ -508,6 +513,11 @@ func (pid Port) TxqSetup(qid, nDesc uint16, opts ...QueueOption) error {
 
 	return err(C.rte_eth_tx_queue_setup(C.ushort(pid), C.ushort(qid),
 		C.ushort(nDesc), C.uint(conf.socket), &conf.tx))
+}
+
+// TxqStop stops specified RX queue of a port.
+func (pid Port) TxqStop(qid uint16) error {
+	return err(C.rte_eth_dev_tx_queue_stop(C.ushort(pid), C.ushort(qid)))
 }
 
 // Reset a Ethernet device and keep its port id.
