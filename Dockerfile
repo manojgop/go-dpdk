@@ -2,6 +2,8 @@ ARG DIST
 ARG DPDK_VER
 FROM nedrey/dpdk-build:${DIST}-${DPDK_VER}
 ARG GO_VERSION
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Almaty
 
 RUN apt-get -y update && apt-get -y install \
 		git \
