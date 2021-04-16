@@ -16,7 +16,9 @@ RUN apt-get -y update && apt-get -y install \
 		libmnl-dev \
 		libjansson-dev \
 		libnuma-dev \
-		libpcap-dev
+		libpcap-dev \
+		libisal-dev \
+		libfdt-dev
 
 RUN curl -SL https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz |\
 		tar -C /usr/local -xzf -
