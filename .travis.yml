@@ -1,6 +1,6 @@
 language: minimal
 
-dist: bionic
+dist: focal
 
 services:
  - docker
@@ -30,25 +30,17 @@ _test_script: &_test_script
 
 jobs:
   include:
-    - env: GO_VERSION=1.13.4 DPDK_VER=v18.11 TAGS=static
+    - env: GO_VERSION=1.16.3 DPDK_VER=v20.11 TAGS=static
       <<: *_test_script
-    - env: GO_VERSION=1.12.13 DPDK_VER=v18.11 TAGS=static
+    - env: GO_VERSION=1.15.11 DPDK_VER=v20.11 TAGS=static
       <<: *_test_script
-    - env: GO_VERSION=1.13.4 DPDK_VER=v19.08 TAGS=static
+    - env: GO_VERSION=1.16.3 DPDK_VER=v20.11 TAGS=shared
       <<: *_test_script
-    - env: GO_VERSION=1.13.4 DPDK_VER=v19.11 TAGS=static
+    - env: GO_VERSION=1.15.11 DPDK_VER=v20.11 TAGS=shared
       <<: *_test_script
-    - env: GO_VERSION=1.13.4 DPDK_VER=v18.11 TAGS=shared
-      <<: *_test_script
-    - env: GO_VERSION=1.12.13 DPDK_VER=v18.11 TAGS=shared
-      <<: *_test_script
-    - env: GO_VERSION=1.13.4 DPDK_VER=v19.08 TAGS=shared
-      <<: *_test_script
-    - env: GO_VERSION=1.13.4 DPDK_VER=v19.11 TAGS=shared
-      <<: *_test_script
-  allow_failures:
-    - env: GO_VERSION=1.13.4 DPDK_VER=v18.11 TAGS=static
-    - env: GO_VERSION=1.12.13 DPDK_VER=v18.11 TAGS=static
+  #allow_failures:
+    #- env: GO_VERSION=1.13.4 DPDK_VER=v18.11 TAGS=static
+    #- env: GO_VERSION=1.12.13 DPDK_VER=v18.11 TAGS=static
 
 # Only clone the most recent commit.
 git:
