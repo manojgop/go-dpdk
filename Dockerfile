@@ -26,6 +26,9 @@ RUN curl -SL https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz |\
 ENV GO111MODULE on
 ENV GOPATH /go
 ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
+ENV CGO_CFLAGS_ALLOW .*
+ENV CGO_LDFLAGS_ALLOW .*
+ENV PKG_CONFIG_PATH /usr/local/share/pkgconfig:$PKG_CONFIG_PATH
 
-COPY . /work
-WORKDIR /work
+VOLUME /repo
+WORKDIR /repo
