@@ -19,14 +19,14 @@ env:
     - GO111MODULE=on
 
 before_install:
-    - docker build -v $(pwd):/repo --build-arg DIST=${TRAVIS_DIST} --build-arg GO_VERSION=${GO_VERSION} --build-arg DPDK_VER=${DPDK_VER} -t test-build .
+    - docker build --build-arg DIST=${TRAVIS_DIST} --build-arg GO_VERSION=${GO_VERSION} --build-arg DPDK_VER=${DPDK_VER} -t test-build .
 
 _test_script: &_test_script
   script:
-    - docker run --rm test-build ./.travis.golint.sh
-    - docker run --rm test-build ./.travis.static.sh
-    - docker run --rm test-build ./.travis.govet.sh
-    - docker run --rm test-build ./.travis.script.sh $TAGS
+    - docker run -v $(pwd):/repo --rm test-build ./.travis.golint.sh
+    - docker run -v $(pwd):/repo --rm test-build ./.travis.static.sh
+    - docker run -v $(pwd):/repo --rm test-build ./.travis.govet.sh
+    - docker run -v $(pwd):/repo --rm test-build ./.travis.script.sh $TAGS
 
 jobs:
   include:
