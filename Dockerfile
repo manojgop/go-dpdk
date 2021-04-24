@@ -1,6 +1,6 @@
 ARG DIST
 ARG DPDK_VER
-FROM nedrey/dpdk-build:${DIST}-${DPDK_VER}
+FROM nedrey/dpdk-build:${DIST}-${DPDK_VER}-sandybridge
 ARG GO_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Almaty
