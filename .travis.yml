@@ -19,7 +19,7 @@ env:
     - GO111MODULE=on
 
 before_install:
-  - docker build --build-arg DIST=${TRAVIS_DIST} --build-arg GO_VERSION=${GO_VERSION} --build-arg DPDK_VER=${DPDK_VER} -t test-build .
+    - docker build -v $(pwd):/repo --build-arg DIST=${TRAVIS_DIST} --build-arg GO_VERSION=${GO_VERSION} --build-arg DPDK_VER=${DPDK_VER} -t test-build .
 
 _test_script: &_test_script
   script:
