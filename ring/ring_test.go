@@ -5,6 +5,7 @@ import (
 	"syscall"
 	"testing"
 	"unsafe"
+	//"fmt"
 
 	"golang.org/x/sys/unix"
 
@@ -116,6 +117,109 @@ func min(x, y int) int {
 	return y
 }
 
+var burstSizeMax uint = 512
+var bufSend = make([]unsafe.Pointer, burstSizeMax)
+var bufRecv = make([]unsafe.Pointer, burstSizeMax)
+var ring_ptr, ring_err = ring.New("testRing", burstSizeMax*4)
+
+func benchmarkRingBurstUintptr(b *testing.B, burst int, n int) {
+	var wg sync.WaitGroup
+
+	sender := func(n int) {
+		defer wg.Done()
+		i := 0
+		for i < n {
+			//n, free := ring_ptr.SpEnqueueBulk(bufSend[:burstSize])
+			//fmt.Printf("num enqueued = %d, free ring entries = %d\n", n, free);
+			ring_ptr.SpEnqueueBulk(bufSend[:burst])
+			i++
+		}
+	}
+
+	receiver := func(n int) {
+		defer wg.Done()
+		i := 0
+		for i < n {
+			//n, available := ring_ptr.ScDequeueBulk(bufRecv)
+			//fmt.Printf("num dequeued = %d, remain ring entries = %d\n", n, available);
+			ring_ptr.ScDequeueBulk(bufRecv)
+			i++
+		}
+	}
+
+	wg.Add(2)
+	go sender(n)
+	go receiver(n)
+	wg.Wait()
+}
+
+func BenchmarkRingBurst1Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkRingBurstUintptr(b, 1, 1)
+	}
+}
+
+func BenchmarkRingBurst128Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkRingBurstUintptr(b, 128, 1)
+	}
+}
+
+func BenchmarkRingBurst512Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkRingBurstUintptr(b, 512, 1)
+	}
+}
+
+func BenchmarkChanBlockUintptr(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		benchmarkChanBlockUintptr(b, 1)
+	}
+}
+
+var ch = make(chan uintptr, burstSizeMax*4)
+
+func benchmarkChanBlockUintptr(b *testing.B, n int) {
+	var wg sync.WaitGroup
+
+	sender := func(n int) {
+		defer wg.Done()
+		i := 0
+		for i < n {
+			ch <- uintptr(0xAABBCCDD)
+			i++
+		}
+	}
+
+	receiver := func(n int) {
+		defer wg.Done()
+		i := 0
+		for i < n {
+			<-ch
+			i++
+		}
+	}
+
+	wg.Add(2)
+	go sender(n)
+	go receiver(n)
+	wg.Wait()
+}
+
+// Keep below section commented.
+/*
 func benchmarkRingUintptr(b *testing.B, burst int) {
 	var wg sync.WaitGroup
 	assert := common.Assert(b, true)
@@ -166,6 +270,7 @@ func BenchmarkRingUintptr128(b *testing.B) {
 func BenchmarkRingUintptr512(b *testing.B) {
 	benchmarkRingUintptr(b, 512)
 }
+
 
 func BenchmarkChanNonblockUintptr(b *testing.B) {
 	var wg sync.WaitGroup
@@ -230,3 +335,5 @@ func BenchmarkChanBlockUintptr(b *testing.B) {
 	go receiver(b.N)
 	wg.Wait()
 }
+ */
+ 
