@@ -129,8 +129,11 @@ func benchmarkRingBurstUintptr(b *testing.B, burst int, n int) {
 		defer wg.Done()
 		i := 0
 		for i < n {
-			//n, free := ring_ptr.SpEnqueueBulk(bufSend[:burstSize])
-			//fmt.Printf("num enqueued = %d, free ring entries = %d\n", n, free);
+			/*num, free := ring_ptr.SpEnqueueBulk(bufSend[:burst])
+			if (num == 0) {
+				fmt.Printf("Enqueue failed \n");
+				fmt.Printf("num enqueued = %d, free ring entries = %d\n", num, free);
+			}*/
 			ring_ptr.SpEnqueueBulk(bufSend[:burst])
 			i++
 		}
@@ -140,9 +143,12 @@ func benchmarkRingBurstUintptr(b *testing.B, burst int, n int) {
 		defer wg.Done()
 		i := 0
 		for i < n {
-			//n, available := ring_ptr.ScDequeueBulk(bufRecv)
-			//fmt.Printf("num dequeued = %d, remain ring entries = %d\n", n, available);
-			ring_ptr.ScDequeueBulk(bufRecv)
+			/*num, available := ring_ptr.ScDequeueBulk(bufRecv[:burst])
+			if (num == 0) {
+				fmt.Printf("Dequeue failed \n");
+				fmt.Printf("num dequeued = %d, remain ring entries = %d\n", num, available);
+			}*/
+			ring_ptr.ScDequeueBulk(bufRecv[:burst])
 			i++
 		}
 	}
@@ -153,7 +159,87 @@ func benchmarkRingBurstUintptr(b *testing.B, burst int, n int) {
 	wg.Wait()
 }
 
-func BenchmarkRingBurst1Uintptr(b *testing.B) {
+
+func benchmarkSimpleRingBurstUintptr(b *testing.B, burst int, n int) {
+	i := 0
+	for i < n {
+			/*num, free := ring_ptr.SpEnqueueBulk(bufSend[:burst])
+			if (num == 0) {
+				fmt.Printf("Enqueue failed \n");
+				fmt.Printf("num enqueued = %d, free ring entries = %d\n", n, free);
+			}
+			num, available := ring_ptr.ScDequeueBulk(bufRecv[:burst])
+			if (num == 0) {
+				fmt.Printf("Dequeue failed \n");
+				fmt.Printf("num dequeued = %d, remain ring entries = %d\n", n, available);
+			}*/
+			ring_ptr.SpEnqueueBulk(bufSend[:burst])
+			ring_ptr.ScDequeueBulk(bufRecv[:burst])
+			i++
+		}
+}
+
+func BenchmarkSimpleRingQueueDequeueBurst1Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkSimpleRingBurstUintptr(b, 1, 1)
+	}
+}
+
+func BenchmarkSimpleRingQueueDequeueBurst32Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkSimpleRingBurstUintptr(b, 32, 1)
+	}
+}
+
+func BenchmarkSimpleRingQueueDequeueBurst64Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkSimpleRingBurstUintptr(b, 64, 1)
+	}
+}
+
+func BenchmarkSimpleRingQueueDequeueBurst128Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkSimpleRingBurstUintptr(b, 128, 1)
+	}
+}
+
+func BenchmarkSimpleRingQueueDequeueBurst256Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkSimpleRingBurstUintptr(b, 256, 1)
+	}
+}
+
+func BenchmarkSimpleRingQueueDequeueBurst512Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkSimpleRingBurstUintptr(b, 512, 1)
+	}
+}
+
+func BenchmarkRingQueueDequeueBurst1Uintptr(b *testing.B) {
 	assert := common.Assert(b, true)
 	assert(initEAL() == nil)
 	assert(ring_ptr != nil && ring_err == nil, ring_err)
@@ -163,7 +249,27 @@ func BenchmarkRingBurst1Uintptr(b *testing.B) {
 	}
 }
 
-func BenchmarkRingBurst128Uintptr(b *testing.B) {
+func BenchmarkRingQueueDequeueBurst32Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkRingBurstUintptr(b, 32, 1)
+	}
+}
+
+func BenchmarkRingQueueDequeueBurst64Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkRingBurstUintptr(b, 64, 1)
+	}
+}
+
+func BenchmarkRingQueueDequeueBurst128Uintptr(b *testing.B) {
 	assert := common.Assert(b, true)
 	assert(initEAL() == nil)
 	assert(ring_ptr != nil && ring_err == nil, ring_err)
@@ -173,7 +279,17 @@ func BenchmarkRingBurst128Uintptr(b *testing.B) {
 	}
 }
 
-func BenchmarkRingBurst512Uintptr(b *testing.B) {
+func BenchmarkRingQueueDequeueBurst256Uintptr(b *testing.B) {
+	assert := common.Assert(b, true)
+	assert(initEAL() == nil)
+	assert(ring_ptr != nil && ring_err == nil, ring_err)
+
+	for i := 0; i < b.N; i++ {
+		benchmarkRingBurstUintptr(b, 256, 1)
+	}
+}
+
+func BenchmarkRingQueueDequeueBurst512Uintptr(b *testing.B) {
 	assert := common.Assert(b, true)
 	assert(initEAL() == nil)
 	assert(ring_ptr != nil && ring_err == nil, ring_err)
@@ -335,5 +451,4 @@ func BenchmarkChanBlockUintptr(b *testing.B) {
 	go receiver(b.N)
 	wg.Wait()
 }
- */
- 
+*/
